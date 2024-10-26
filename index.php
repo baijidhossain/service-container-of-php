@@ -66,6 +66,7 @@ $container->register('user_service', function ($container) {
   return new UserService($container->get('logger'));
 });
 
+// Register off Logger class name as serviceProvider3.... Return Logger class instance
 $container->register('serviceProvider3', function () {
   return new Logger();
 });
