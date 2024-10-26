@@ -48,32 +48,47 @@ class UserService
   }
 }
 
-class serviceProvider2
+// Service Provider for Logger
+class LoggerServiceProvider
 {
-  function test($param = "default value")
+  public function register(ServiceContainer $container)
   {
-    echo $param;
+    $container->register('logger', function () {
+      return new Logger();
+    });
   }
 }
 
+// Service Provider for UserService
+class UserServiceProvider
+{
+  public function register(ServiceContainer $container)
+  {
+    $container->register('user_service', function ($container) {
+      return new UserService($container->get('logger'));
+    });
+  }
+}
+
+// Initialize the service container
 $container = new ServiceContainer();
 
-$container->register('logger', function () {
-  return new Logger();
-});
+// Register services using the service providers
+$loggerProvider = new LoggerServiceProvider();
+$loggerProvider->register($container);
 
-$container->register('user_service', function ($container) {
-  return new UserService($container->get('logger'));
-});
+$userServiceProvider = new UserServiceProvider();
+$userServiceProvider->register($container);
 
-// Register off Logger class name as serviceProvider3.... Return Logger class instance
+// Register Logger instance as serviceProvider3
 $container->register('serviceProvider3', function () {
   return new Logger();
 });
 
+// Use the registered services
 $serviceProvider2 = $container->get('serviceProvider3');
 $serviceProvider2->log("Test log");
 
-// Uncomment the following lines to use UserService
-// $userService = $container->get('user_service');
-// $userService->createUser('Baijid Hossain');
+// Optionally, get and use UserService
+$userService = $container->get('user_service');
+$userService->createUser('Baijid Hossain');
